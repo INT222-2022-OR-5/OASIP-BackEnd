@@ -1,7 +1,0 @@
--------------------------------------------------------------------------------
-Test set: sit.int221.apptestservicev2p1.ApptestServiceV2p1ApplicationTests
--------------------------------------------------------------------------------
-Tests run: 1, Failures: 0, Errors: 1, Skipped: 0, Time elapsed: 0.162 s <<< FAILURE! - in sit.int221.apptestservicev2p1.ApptestServiceV2p1ApplicationTests
-sit.int221.apptestservicev2p1.ApptestServiceV2p1ApplicationTests  Time elapsed: 0.161 s  <<< ERROR!
-java.lang.IllegalStateException: Unable to find a @SpringBootConfiguration, you need to use @ContextConfiguration or @SpringBootTest(classes=...) with your test
-
