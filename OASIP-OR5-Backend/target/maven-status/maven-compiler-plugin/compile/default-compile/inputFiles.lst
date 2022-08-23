@@ -1,0 +1,13 @@
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/dto/EventCategoryDTO.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/OasipOr5Application.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/services/EventService.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/dto/EventDTO.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/controllers/EventCategoryController.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/entities/Event.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/repositories/EventCategoryRepository.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/services/EventCategoryService.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/ApplicationConfig.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/controllers/EventController.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/repositories/EventRepository.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/entities/EventCategory.java
+/Users/olarnr/Documents/Teaching/INT221/2021/Codes/or5/OASIP-OR5-Backend/src/main/java/sit/int221/projectoasipor5/Utils/ListMapper.java
