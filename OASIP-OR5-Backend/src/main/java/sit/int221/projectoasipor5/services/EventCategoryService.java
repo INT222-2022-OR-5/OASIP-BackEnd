@@ -1,10 +1,8 @@
 package sit.int221.projectoasipor5.services;
 
 import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.server.ResponseStatusException;
-import sit.int221.projectoasipor5.Utils.ListMapper;
+import sit.int221.projectoasipor5.utils.ListMapper;
 import sit.int221.projectoasipor5.dto.EventCategoryDTO;
 import sit.int221.projectoasipor5.dto.EventCategoryUpdateDTO;
 import sit.int221.projectoasipor5.entities.EventCategory;

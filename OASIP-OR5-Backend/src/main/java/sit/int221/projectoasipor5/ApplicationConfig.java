@@ -3,7 +3,7 @@ package sit.int221.projectoasipor5;
 import org.modelmapper.ModelMapper;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import sit.int221.projectoasipor5.Utils.ListMapper;
+import sit.int221.projectoasipor5.utils.ListMapper;
 
 
 @Configuration
