@@ -12,6 +12,7 @@ import sit.int221.projectoasipor5.dto.UserDTO;
 import sit.int221.projectoasipor5.dto.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
 import sit.int221.projectoasipor5.repositories.UserRepository;
+import sit.int221.projectoasipor5.utils.Role;
 
 import javax.validation.Valid;
 import java.util.List;
@@ -42,6 +43,7 @@ public class UserService {
 
     public User createUser(@Valid UserAddDTO user) {
         User newUser = modelMapper.map(user, User.class);
+        newUser.setRole(user.getRole().trim());
         newUser.setName(user.getName().trim());
         newUser.setEmail(user.getEmail().trim());
         repository.saveAndFlush(newUser);
