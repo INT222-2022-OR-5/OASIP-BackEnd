@@ -41,12 +41,31 @@ public class UserService {
         return modelMapper.map(user, UserDTO.class);
     }
 
-    public User createUser(@Valid UserAddDTO user) {
-        User newUser = modelMapper.map(user, User.class);
-        newUser.setRole(user.getRole().trim());
-        newUser.setName(user.getName().trim());
-        newUser.setEmail(user.getEmail().trim());
-        repository.saveAndFlush(newUser);
+//    public User createUser(@Valid UserAddDTO user) {
+//        User newUser = modelMapper.map(user, User.class);
+//        newUser.setRole(user.getRole().trim());
+//        newUser.setName(user.getName().trim());
+//        newUser.setEmail(user.getEmail().trim());
+//        repository.saveAndFlush(newUser);
+//        return modelMapper.map(newUser, User.class);
+//    }
+
+    public User createUser(@Valid UserAddDTO newUser) {
+        User user = modelMapper.map(newUser, User.class);
+        user.setName(newUser.getName().trim());
+        user.setEmail(newUser.getEmail().trim());
+        user.setRole(newUser.getRole().toLowerCase());
+
+        List<User> name = repository.findNameUnique(newUser.getName().trim().toLowerCase());
+        if(name.size() != 0 ){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This username is already in use");
+        }
+        List<User> email = repository.findEmailUnique(newUser.getEmail().trim().toLowerCase());
+        if(email.size() != 0 ){
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This email is already in use");
+        }
+
+        repository.saveAndFlush(user);
         return modelMapper.map(newUser, User.class);
     }
 
