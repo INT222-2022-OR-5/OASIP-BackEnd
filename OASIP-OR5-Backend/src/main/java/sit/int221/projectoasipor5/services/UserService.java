@@ -6,6 +6,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
+import sit.int221.projectoasipor5.dto.UserLoginDTO;
 import sit.int221.projectoasipor5.utils.ListMapper;
 import sit.int221.projectoasipor5.dto.UserAddDTO;
 import sit.int221.projectoasipor5.dto.UserDTO;
@@ -27,6 +28,9 @@ public class UserService {
 
     @Autowired
     private UserRepository repository;
+
+    @Autowired
+    private UserPasswordService passwordEncoder;
 
     public List<UserDTO> getAllUser() {
         List<User> users = repository.findAll((Sort.by("name").ascending()));
@@ -54,7 +58,8 @@ public class UserService {
         User user = modelMapper.map(newUser, User.class);
         user.setName(newUser.getName().trim());
         user.setEmail(newUser.getEmail().trim());
-        user.setRole(newUser.getRole().toLowerCase());
+        user.setRole(newUser.getRole());
+        user.setPassword(passwordEncoder.encode(newUser.getPassword()));
 
         List<User> name = repository.findNameUnique(newUser.getName().trim().toLowerCase());
         if(name.size() != 0 ){
@@ -65,6 +70,7 @@ public class UserService {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "This email is already in use");
         }
 
+//        user.setPassword("Protected Field");
         repository.saveAndFlush(user);
         return modelMapper.map(newUser, User.class);
     }
@@ -107,6 +113,21 @@ public class UserService {
                 }
         );
         return isNotUnique[0];
+    }
+
+    public User match(UserLoginDTO user){
+        if(matchPassword(user)){
+            throw new ResponseStatusException(HttpStatus.OK, "User password match");
+        }else throw new ResponseStatusException(HttpStatus.UNAUTHORIZED , "User password not match");
+    }
+
+    public boolean matchPassword(UserLoginDTO user){
+        User user1 = modelMapper.map(user , User.class);
+        User match = repository.matchPass(user.getEmail());
+        if(match == null){
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND , "Email does not exist");
+        }
+        return passwordEncoder.matches(user1.getPassword() ,match.getPassword());
     }
 
     private User mapUser(User existingUser , UserUpdateDTO updateUser){

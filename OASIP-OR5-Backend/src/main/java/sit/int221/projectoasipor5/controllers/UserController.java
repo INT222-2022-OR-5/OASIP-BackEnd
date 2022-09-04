@@ -6,6 +6,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.projectoasipor5.dto.UserAddDTO;
 import sit.int221.projectoasipor5.dto.UserDTO;
+import sit.int221.projectoasipor5.dto.UserLoginDTO;
 import sit.int221.projectoasipor5.dto.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
 import sit.int221.projectoasipor5.services.UserService;
@@ -49,6 +50,12 @@ public class UserController {
     @PutMapping("/{id}")
     public User updateUser(@PathVariable Integer id,@RequestBody UserUpdateDTO updateUser){
         return userService.updateUser(updateUser, id);
+    }
+
+    //Login
+    @PostMapping("/match")
+    public User match(@Valid @RequestBody UserLoginDTO user){
+        return userService.match(user);
     }
 
 }

@@ -31,9 +31,9 @@ public class UserAddDTO {
     @Length(min = 1, max = 50, message="UserEmail must be between 1 and 50")
     private String email;
 
-//    @NotBlank(message = "Password must not be blank")
-//    @Length(min = 8, max = 14, message="Password must be between 8 and 14")
-//    private String password;
+    @NotNull(message = "Password must not be null")
+    @Length(min = 8, max = 14, message="Password must be between 8 and 14")
+    private String password;
 
     @NotNull(message = "Role must not be null")
     @EnumValidator(enumClass = Role.class)
