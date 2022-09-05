@@ -1,4 +1,4 @@
-package sit.int221.projectoasipor5.Utils;
+package sit.int221.projectoasipor5.utils;
 
 import org.modelmapper.ModelMapper;
 import java.util.List;

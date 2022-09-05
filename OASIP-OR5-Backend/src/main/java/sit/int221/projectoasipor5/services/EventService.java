@@ -1,9 +1,7 @@
 package sit.int221.projectoasipor5.services;
 
 import org.springframework.data.domain.Sort;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import sit.int221.projectoasipor5.Utils.ListMapper;
+import sit.int221.projectoasipor5.utils.ListMapper;
 import sit.int221.projectoasipor5.dto.EventDTO;
 import sit.int221.projectoasipor5.dto.EventUpdateDTO;
 import sit.int221.projectoasipor5.entities.Event;
@@ -14,7 +12,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Service

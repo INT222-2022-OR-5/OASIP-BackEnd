@@ -12,4 +12,7 @@ public interface UserRepository extends JpaRepository<User,Integer> {
 
     @Query(value = "select * from user s where s.email = :email",nativeQuery = true)
     List<User> findEmailUnique(String email);
+
+    @Query(value = "select * from user u where u.email like ?1",nativeQuery = true)
+    public User matchPass(String email);
 }

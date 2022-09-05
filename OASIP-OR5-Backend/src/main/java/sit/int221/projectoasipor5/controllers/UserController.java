@@ -6,9 +6,12 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import sit.int221.projectoasipor5.dto.UserAddDTO;
 import sit.int221.projectoasipor5.dto.UserDTO;
+import sit.int221.projectoasipor5.dto.UserLoginDTO;
+import sit.int221.projectoasipor5.dto.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
 import sit.int221.projectoasipor5.services.UserService;
 
+import javax.validation.Valid;
 import java.util.List;
 
 @CrossOrigin(origins = "*")
@@ -30,7 +33,7 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    //Update user with id
+    //Create user with id
     @PostMapping("")
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@Validated @RequestBody UserAddDTO newUser) {
@@ -43,5 +46,16 @@ public class UserController {
         userService.deleteById(id);
     }
 
+    //Update user with id
+    @PutMapping("/{id}")
+    public User updateUser(@PathVariable Integer id,@RequestBody UserUpdateDTO updateUser){
+        return userService.updateUser(updateUser, id);
+    }
+
+    //Login
+    @PostMapping("/match")
+    public User match(@Valid @RequestBody UserLoginDTO user){
+        return userService.match(user);
+    }
 
 }

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
-import sit.int221.projectoasipor5.Utils.Role;
+import sit.int221.projectoasipor5.utils.Role;
 import sit.int221.projectoasipor5.exception.EmailUnique;
 import sit.int221.projectoasipor5.exception.EnumValidator;
 import sit.int221.projectoasipor5.exception.NameUnique;
@@ -30,6 +30,10 @@ public class UserAddDTO {
     @NotBlank(message = "UserEmail must not be blank")
     @Length(min = 1, max = 50, message="UserEmail must be between 1 and 50")
     private String email;
+
+    @NotNull(message = "Password must not be null")
+    @Length(min = 8, max = 14, message="Password must be between 8 and 14")
+    private String password;
 
     @NotNull(message = "Role must not be null")
     @EnumValidator(enumClass = Role.class)
