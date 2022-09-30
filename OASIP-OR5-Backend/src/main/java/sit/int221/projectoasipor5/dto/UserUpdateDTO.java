@@ -6,7 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.validator.constraints.Length;
-import sit.int221.projectoasipor5.utils.Role;
+import sit.int221.projectoasipor5.entities.Role;
 import sit.int221.projectoasipor5.exception.EmailUnique;
 import sit.int221.projectoasipor5.exception.EnumValidator;
 import sit.int221.projectoasipor5.exception.NameUnique;
