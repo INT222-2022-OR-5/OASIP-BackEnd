@@ -7,6 +7,10 @@ import sit.int221.projectoasipor5.entities.User;
 import java.util.List;
 
 public interface UserRepository extends JpaRepository<User,Integer> {
+    boolean existsByEmail(String email);
+
+    User findByEmail(String email);
+
     @Query(value = "select * from User s where s.name like ?1",nativeQuery = true)
     List<User> findNameUnique(String name);
 
@@ -14,5 +18,5 @@ public interface UserRepository extends JpaRepository<User,Integer> {
     List<User> findEmailUnique(String email);
 
     @Query(value = "select * from User u where u.email like ?1",nativeQuery = true)
-    public User matchPass(String email);
+    User matchPass(String email);
 }

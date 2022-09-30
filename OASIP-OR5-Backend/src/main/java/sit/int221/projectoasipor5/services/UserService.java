@@ -4,19 +4,33 @@ import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.BadCredentialsException;
+import org.springframework.security.authentication.DisabledException;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Service;
+import org.springframework.web.context.request.ServletWebRequest;
 import org.springframework.web.server.ResponseStatusException;
+import sit.int221.projectoasipor5.config.JwtTokenUtil;
 import sit.int221.projectoasipor5.dto.UserLoginDTO;
+import sit.int221.projectoasipor5.exception.HandleValidationErrors;
+import sit.int221.projectoasipor5.models.JwtResponse;
 import sit.int221.projectoasipor5.utils.ListMapper;
 import sit.int221.projectoasipor5.dto.UserAddDTO;
 import sit.int221.projectoasipor5.dto.UserDTO;
 import sit.int221.projectoasipor5.dto.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
 import sit.int221.projectoasipor5.repositories.UserRepository;
-import sit.int221.projectoasipor5.utils.Role;
+import org.springframework.security.core.userdetails.UserDetails;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
+import java.time.Instant;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -32,6 +46,15 @@ public class UserService {
     @Autowired
     private UserPasswordService passwordEncoder;
 
+    @Autowired
+    private AuthenticationManager authenticationManager;
+
+    @Autowired
+    private JwtTokenUtil jwtTokenUtil;
+
+    @Autowired
+    private JwtUserDetailsService userDetailsService;
+
     public List<UserDTO> getAllUser() {
         List<User> users = repository.findAll((Sort.by("name").ascending()));
         return listMapper.mapList(users, UserDTO.class, modelMapper);
@@ -44,15 +67,6 @@ public class UserService {
                         "Does Not Exist !!!"));
         return modelMapper.map(user, UserDTO.class);
     }
-
-//    public User createUser(@Valid UserAddDTO user) {
-//        User newUser = modelMapper.map(user, User.class);
-//        newUser.setRole(user.getRole().trim());
-//        newUser.setName(user.getName().trim());
-//        newUser.setEmail(user.getEmail().trim());
-//        repository.saveAndFlush(newUser);
-//        return modelMapper.map(newUser, User.class);
-//    }
 
     public User createUser(@Valid UserAddDTO newUser) {
         User user = modelMapper.map(newUser, User.class);
@@ -136,4 +150,55 @@ public class UserService {
         existingUser.setRole(updateUser.getRole());
         return existingUser;
     }
+
+    public ResponseEntity Login (UserLoginDTO user, HttpServletResponse httpServletResponse, ServletWebRequest request) throws Exception {
+        Map<String,String> errorMap = new HashMap<>();
+        String status;
+
+        if (repository.existsByEmail(user.getEmail())) {
+            User userdb = repository.findByEmail(user.getEmail());
+            if (passwordEncoder.matches(user.getPassword(), userdb.getPassword())) {
+                errorMap.put("message", "Password Matched");
+                httpServletResponse.setStatus(HttpServletResponse.SC_OK);
+                status = HttpStatus.OK.toString();
+
+                authenticate(user.getEmail() , user.getPassword());
+                authenticate(user.getEmail(), user.getPassword());
+
+                final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail());
+
+                final String token = jwtTokenUtil.generateToken(userDetails);
+                final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
+
+                return ResponseEntity.ok(new JwtResponse("Liogin Successfully", token, refreshToken));
+
+            } else {
+                errorMap.put("message", "Password NOT Matched");
+                httpServletResponse.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+                status = HttpStatus.UNAUTHORIZED.toString();
+            }
+        } else {
+            errorMap.put("message", "A user with the specified email DOES NOT exist");
+            httpServletResponse.setStatus(HttpServletResponse.SC_NOT_FOUND);
+            status = HttpStatus.NOT_FOUND.toString();
+        }
+        HandleValidationErrors errors = new HandleValidationErrors(
+                Date.from(Instant.now()),
+                httpServletResponse.getStatus(),
+                request.getRequest().getRequestURI(),
+                status,
+                errorMap.get("message"));
+        return ResponseEntity.status(httpServletResponse.getStatus()).body(errors);
+    }
+
+    private void authenticate(String email, String password) throws Exception {
+        try {
+            authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(email, password));
+        } catch (DisabledException e) {
+            throw new Exception("USER_DISABLED", e);
+        } catch (BadCredentialsException e) {
+            throw new Exception("INVALID_CREDENTIALS", e);
+        }
+    }
+
 }
