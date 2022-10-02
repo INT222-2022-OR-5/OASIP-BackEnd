@@ -52,7 +52,7 @@ public class UserController {
         return userService.updateUser(updateUser, id);
     }
 
-    //Check user
+    //Check email and password
     @PostMapping("/match")
     public User match(@Valid @RequestBody UserLoginDTO user){
         return userService.match(user);
