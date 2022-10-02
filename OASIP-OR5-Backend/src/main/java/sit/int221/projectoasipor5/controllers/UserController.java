@@ -34,7 +34,7 @@ public class UserController {
     }
 
     //Create user with id
-    @PostMapping("")
+    @PostMapping("/signup")
     @ResponseStatus(HttpStatus.CREATED)
     public User createUser(@Validated @RequestBody UserAddDTO newUser) {
         return userService.createUser(newUser);
@@ -52,7 +52,7 @@ public class UserController {
         return userService.updateUser(updateUser, id);
     }
 
-    //Login
+    //Check email and password
     @PostMapping("/match")
     public User match(@Valid @RequestBody UserLoginDTO user){
         return userService.match(user);

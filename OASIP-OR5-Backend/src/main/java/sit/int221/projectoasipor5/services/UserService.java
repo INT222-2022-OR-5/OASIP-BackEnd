@@ -170,7 +170,7 @@ public class UserService {
                 final String token = jwtTokenUtil.generateToken(userDetails);
                 final String refreshToken = jwtTokenUtil.generateRefreshToken(userDetails);
 
-                return ResponseEntity.ok(new JwtResponse("Liogin Successfully", token, refreshToken));
+                return ResponseEntity.ok(new JwtResponse("Login Successfully", token, refreshToken));
 
             } else {
                 errorMap.put("message", "Password NOT Matched");
