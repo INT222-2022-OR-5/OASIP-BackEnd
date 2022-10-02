@@ -28,7 +28,6 @@ public class RefreshTokenService {
         UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(userRefreshToken);
         String accessToken = jwtTokenUtill.generateToken(userDetails);
         String refreshToken = jwtTokenUtill.generateRefreshToken(userDetails);
-//            String getRefreshTokenExpire = jwtTokenUtill.getExpirationDateFromToken(u)
         if (checkExpired(requestRefreshToken).equals(true)) {
             return ResponseEntity.ok(new JwtResponse("Refresh Token Successfully",accessToken,refreshToken));
         }
