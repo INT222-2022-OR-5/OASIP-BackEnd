@@ -2,9 +2,7 @@ package sit.int221.projectoasipor5.services;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
-import sit.int221.projectoasipor5.utils.ListMapper;
-import sit.int221.projectoasipor5.dto.EventCategoryDTO;
-import sit.int221.projectoasipor5.dto.EventCategoryUpdateDTO;
+import sit.int221.projectoasipor5.dto.EventCategory.EventCategoryDTO;
 import sit.int221.projectoasipor5.entities.EventCategory;
 import sit.int221.projectoasipor5.repositories.EventCategoryRepository;
 import org.modelmapper.ModelMapper;
@@ -39,25 +37,20 @@ public class EventCategoryService {
     }
 
     //Update event with id
-    public EventCategoryUpdateDTO update(EventCategoryUpdateDTO update, Integer id){
-        EventCategory category = modelMapper.map(update, EventCategory.class);
-        EventCategory ct = repository.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(
-                        HttpStatus.BAD_REQUEST, "Booking id" + id +
-                        "Not found ID to Edit"
-                ));
-        ct.setEventCategoryName(category.getEventCategoryName());
-        ct.setEventDuration(category.getEventDuration());
-        ct.setEventCategoryDescription(category.getEventCategoryDescription());
-
-        repository.saveAndFlush(ct);
-        return modelMapper.map(ct,EventCategoryUpdateDTO.class);
+    public EventCategory update(EventCategory updateCategory, Integer id){
+        EventCategory category = repository.findById(id).map(c->mapCategory(c, updateCategory))
+                .orElseGet(()->
+                {
+                    updateCategory.setId(id);
+                    return updateCategory;
+                });
+        return repository.saveAndFlush(category);
     }
 
-    private EventCategory mapCategory(EventCategory existingEvent, EventCategory updateEvent) {
-        existingEvent.setEventCategoryName(updateEvent.getEventCategoryName());
-        existingEvent.setEventCategoryDescription(updateEvent.getEventCategoryDescription());
-        existingEvent.setEventDuration(updateEvent.getEventDuration());
+    private EventCategory mapCategory(EventCategory existingEvent, EventCategory updateCategory) {
+        existingEvent.setEventCategoryName(updateCategory.getEventCategoryName());
+        existingEvent.setEventCategoryDescription(updateCategory.getEventCategoryDescription());
+        existingEvent.setEventDuration(updateCategory.getEventDuration());
         return existingEvent;
     }
 }
