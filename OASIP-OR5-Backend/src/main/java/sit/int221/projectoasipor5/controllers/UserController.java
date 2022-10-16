@@ -1,30 +1,41 @@
 package sit.int221.projectoasipor5.controllers;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
-import sit.int221.projectoasipor5.dto.UserAddDTO;
-import sit.int221.projectoasipor5.dto.UserDTO;
-import sit.int221.projectoasipor5.dto.UserLoginDTO;
-import sit.int221.projectoasipor5.dto.UserUpdateDTO;
+import org.springframework.web.server.ResponseStatusException;
+import sit.int221.projectoasipor5.dto.User.UserCreateDTO;
+import sit.int221.projectoasipor5.dto.User.UserDTO;
+import sit.int221.projectoasipor5.dto.User.UserLoginDTO;
+import sit.int221.projectoasipor5.dto.User.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
+import sit.int221.projectoasipor5.exception.CheckUniqueUserExceptionHandler;
+import sit.int221.projectoasipor5.repositories.UserRepository;
 import sit.int221.projectoasipor5.services.UserService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     @Autowired
     UserService userService;
 
+    @Autowired
+    private ModelMapper modelMapper;
+
+    @Autowired
+    private UserRepository repository;
+
     //Get all user
     @GetMapping
     public List<UserDTO> getAllUsers() {
-        return userService.getAllUser();
+        return this.userService.getAllUser();
     }
 
     //Get user with id
@@ -33,10 +44,10 @@ public class UserController {
         return userService.getUserById(id);
     }
 
-    //Create user with id
-    @PostMapping("/signup")
+    //Create user
+    @PostMapping({"/signup"})
     @ResponseStatus(HttpStatus.CREATED)
-    public User createUser(@Validated @RequestBody UserAddDTO newUser) {
+    public User create( @Validated @RequestBody UserCreateDTO newUser) throws CheckUniqueUserExceptionHandler {
         return userService.createUser(newUser);
     }
 
@@ -47,15 +58,31 @@ public class UserController {
     }
 
     //Update user with id
-    @PutMapping("/{id}")
-    public User updateUser(@PathVariable Integer id,@RequestBody UserUpdateDTO updateUser){
-        return userService.updateUser(updateUser, id);
+    @PutMapping({"/{id}"})
+    public ResponseEntity update(@Valid @RequestBody UserUpdateDTO updateUser, @PathVariable Integer id) throws CheckUniqueUserExceptionHandler {
+        List<UserDTO> userList = getAllUsers();
+
+        updateUser.setName(updateUser.getName().trim());
+        updateUser.setEmail(updateUser.getEmail().trim());
+
+        for(int i = 0; i < userList.size(); i++) {
+            if(updateUser.getName().trim().equals(userList.get(i).getName()) && updateUser.getEmail().trim().equals(userList.get(i).getEmail())
+                    && userList.get(i).getId() != id && userList.get(i).getId() != id) {
+                throw new CheckUniqueUserExceptionHandler("User and Email already exist");
+            }else if(updateUser.getName().trim().equals(userList.get(i).getName()) && userList.get(i).getId() != id){
+                throw new CheckUniqueUserExceptionHandler("User name must be unique.");
+            } else if(updateUser.getEmail().trim().equals(userList.get(i).getEmail()) && userList.get(i).getId() != id){
+                throw new CheckUniqueUserExceptionHandler("User email must be unique.");
+            }
+        }
+        User user = repository.findById(id).orElseThrow(() ->
+                new ResponseStatusException(HttpStatus.NOT_FOUND,
+                        id + " does not exist !!!"));
+
+        modelMapper.map(updateUser, user);
+        repository.saveAndFlush(user);
+        return ResponseEntity.status(200).body(user);
     }
 
-    //Check email and password
-    @PostMapping("/match")
-    public User match(@Valid @RequestBody UserLoginDTO user){
-        return userService.match(user);
-    }
 
 }

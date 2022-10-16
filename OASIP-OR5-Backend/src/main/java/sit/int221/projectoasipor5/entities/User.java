@@ -1,15 +1,20 @@
 package sit.int221.projectoasipor5.entities;
 
-import lombok.Getter;
-import lombok.Setter;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
-import java.sql.Timestamp;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import lombok.*;
 
 import javax.persistence.*;
+import java.time.Instant;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
-@Getter @Setter
-@Entity @Table(name = "User")
+@AllArgsConstructor
+@NoArgsConstructor
+@Getter
+@Setter
+@Entity
+@Table(name = "User")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -22,18 +27,29 @@ public class User {
     @Column(name = "email", nullable = false, length = 50)
     private String email;
 
-    @Column(name = "password", nullable = false, length = 100)
+    @Column(name = "password", nullable = false, length = 14)
     private String password;
 
-    @Lob
     @Column(name = "role", nullable = false)
-    private String role;
+    @Enumerated(EnumType.STRING)
+    private Role role;
 
-    @CreationTimestamp
-    @Column(name = "createdOn", insertable = false)
-    private Timestamp createdOn;
+    @Column(name = "createdOn", nullable = false, updatable = false, insertable = false)
+    private Instant createdOn;
 
-    @UpdateTimestamp
-    @Column(name = "updatedOn", updatable = false)
-    private Timestamp updatedOn;
+    @Column(name = "updatedOn", nullable = false, updatable = false, insertable = false)
+    private Instant updatedOn;
+
+    @OneToMany(mappedBy = "user")
+    private Set<Event> events = new LinkedHashSet<>();
+
+    @JsonIgnore
+    @ManyToMany(fetch = FetchType.LAZY, cascade = { CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(name = "CategoryOwner", joinColumns = { @JoinColumn(name = "userId") }, inverseJoinColumns = { @JoinColumn(name = "eventCategoryId") })
+    private Set<EventCategory> eventCategories = new HashSet<>();
+
+    public void addEventCategory(EventCategory eventCategory) {
+        this.eventCategories.add(eventCategory);
+        eventCategory.getUsers().add(this);
+    }
 }

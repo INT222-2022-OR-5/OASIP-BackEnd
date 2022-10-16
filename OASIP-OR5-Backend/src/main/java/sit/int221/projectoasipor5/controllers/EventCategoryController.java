@@ -3,16 +3,14 @@ package sit.int221.projectoasipor5.controllers;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
-import sit.int221.projectoasipor5.dto.EventCategoryDTO;
-import sit.int221.projectoasipor5.dto.EventCategoryUpdateDTO;
+import sit.int221.projectoasipor5.dto.EventCategory.EventCategoryDTO;
 import sit.int221.projectoasipor5.entities.EventCategory;
 import sit.int221.projectoasipor5.services.EventCategoryService;
 
 import javax.validation.Valid;
 import java.util.List;
 
-
-@CrossOrigin(origins = "*")
+//@CrossOrigin(origins = "*")
 @RestController
 @RequestMapping("/api/eventCategory") //แสดงรายการของ เวลาการนัดหมายทั้งหมดใน Event
 public class EventCategoryController {
@@ -34,7 +32,7 @@ public class EventCategoryController {
     //Update category with id
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public EventCategoryUpdateDTO edit(@Valid @RequestBody EventCategoryUpdateDTO updateCategory, @PathVariable Integer id) {
+    public EventCategory edit(@Valid @RequestBody EventCategory updateCategory, @PathVariable Integer id) {
         return eventCategoryService.update(updateCategory,id);
     }
 }
