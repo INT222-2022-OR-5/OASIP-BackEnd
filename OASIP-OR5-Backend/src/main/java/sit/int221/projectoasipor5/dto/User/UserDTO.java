@@ -16,7 +16,7 @@ import java.time.Instant;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UserDTO {
-    private Integer id;
+    private Integer userId;
 
     @NotBlank(message = "UserName must not be blank")
     @Length(min = 1, max = 100, message="UserName must be between 1 and 100")
