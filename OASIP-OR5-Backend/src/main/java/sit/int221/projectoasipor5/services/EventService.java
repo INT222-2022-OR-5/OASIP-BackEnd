@@ -116,7 +116,7 @@ public class EventService {
             }
 
             User addByAdmin = userRepository.findByEmail(newEvent.getBookingEmail());
-            newEvent.setUserId(addByAdmin.getId());
+            newEvent.setUserId(addByAdmin.getUserId());
             Event e = modelMapper.map(newEvent, Event.class);
             repository.saveAndFlush(e);
             return ResponseEntity.status(HttpStatus.OK).body(e).getBody();
@@ -136,7 +136,7 @@ public class EventService {
                         }
                     }
                 }
-                newEvent.setUserId(userLogin.getId());
+                newEvent.setUserId(userLogin.getUserId());
                 Event e = modelMapper.map(newEvent, Event.class);
                 repository.saveAndFlush(e);
                 return ResponseEntity.status(HttpStatus.OK).body(e).getBody();
@@ -170,20 +170,6 @@ public class EventService {
             throw new HandleExceptionForbidden("You are not allowed to delete event");
         }
     }
-
-    //Update event with id
-//    public EventDTO update(EventUpdateDTO updateEvent, Integer id){
-//        Event booking = modelMapper.map(updateEvent, Event.class);
-//        Event e = repository.findById(id)
-//                .orElseThrow(() -> new ResponseStatusException(
-//                        HttpStatus.BAD_REQUEST, "EventId" + id +
-//                        "not found to edit"
-//                ));
-//        e.setEventStartTime(booking.getEventStartTime());
-//        e.setEventNotes(booking.getEventNotes());
-//        repository.saveAndFlush(e);
-//        return modelMapper.map(e,EventDTO.class);
-//    }
 
     public Date findEndDate(Date date, Integer duration) {
         return new Date(date.getTime() + (duration * 60000 + 60000));

@@ -6,10 +6,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.server.ResponseStatusException;
 import sit.int221.projectoasipor5.dto.User.UserCreateDTO;
 import sit.int221.projectoasipor5.dto.User.UserDTO;
-import sit.int221.projectoasipor5.dto.User.UserLoginDTO;
 import sit.int221.projectoasipor5.dto.User.UserUpdateDTO;
 import sit.int221.projectoasipor5.entities.User;
 import sit.int221.projectoasipor5.exception.CheckUniqueUserExceptionHandler;
@@ -40,7 +40,7 @@ public class UserController {
 
     //Get user with id
     @GetMapping("/{id}")
-    public UserDTO getUserById(@PathVariable Integer id){
+    public UserDTO getUserById(@PathVariable Integer id, WebRequest request){
         return userService.getUserById(id);
     }
 
@@ -67,11 +67,11 @@ public class UserController {
 
         for(int i = 0; i < userList.size(); i++) {
             if(updateUser.getName().trim().equals(userList.get(i).getName()) && updateUser.getEmail().trim().equals(userList.get(i).getEmail())
-                    && userList.get(i).getId() != id && userList.get(i).getId() != id) {
+                    && userList.get(i).getUserId() != id && userList.get(i).getUserId() != id) {
                 throw new CheckUniqueUserExceptionHandler("User and Email already exist");
-            }else if(updateUser.getName().trim().equals(userList.get(i).getName()) && userList.get(i).getId() != id){
+            }else if(updateUser.getName().trim().equals(userList.get(i).getName()) && userList.get(i).getUserId() != id){
                 throw new CheckUniqueUserExceptionHandler("User name must be unique.");
-            } else if(updateUser.getEmail().trim().equals(userList.get(i).getEmail()) && userList.get(i).getId() != id){
+            } else if(updateUser.getEmail().trim().equals(userList.get(i).getEmail()) && userList.get(i).getUserId() != id){
                 throw new CheckUniqueUserExceptionHandler("User email must be unique.");
             }
         }

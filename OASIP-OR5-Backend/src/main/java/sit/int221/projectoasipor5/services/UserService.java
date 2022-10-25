@@ -51,7 +51,7 @@ public class UserService implements UserDetailsService {
         return this.modelMapper.map(user, UserDTO.class);
     }
 
-    public User createUser(UserCreateDTO newUser) {
+    public User createUser(UserCreateDTO newUser) throws CheckUniqueUserExceptionHandler {
         newUser.setName(newUser.getName().trim());
         newUser.setEmail(newUser.getEmail().trim());
         newUser.setPassword(argon2PasswordEncoder.encode(newUser.getPassword()));
