@@ -95,57 +95,40 @@ public class EventService {
     public Event save(EventDTO newEvent) throws OverlappedExceptionHandler, HandleExceptionForbidden, HandleExceptionBadRequest {
         Date newEventStartTime = Date.from(newEvent.getEventStartTime());
         Date newEventEndTime = findEndDate(Date.from(newEvent.getEventStartTime()), newEvent.getEventDuration());
-        List<EventDTO> eventList = getAllEvent();
+        List<EventDTO> eventList = getEventToCheckOverlap();
 
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         User userLogin = userRepository.findByEmail(auth.getPrincipal().toString());
 
-        if (userLogin.getRole().equals(Role.admin)) {
-            for (EventDTO eventDTO : eventList) {
-                if (Objects.equals(newEvent.getEventCategory().getId(), eventDTO.getEventCategory().getId())) {
-                    Date eventStartTime = Date.from(eventDTO.getEventStartTime());
-                    Date eventEndTime = findEndDate(Date.from(eventDTO.getEventStartTime()), eventDTO.getEventDuration());
-                    if (newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventStartTime) ||
-                            newEventStartTime.before(eventEndTime) && newEventEndTime.after(eventEndTime) ||
-                            newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventEndTime) ||
-                            newEventStartTime.after(eventStartTime) && newEventEndTime.before(eventEndTime) ||
-                            newEventStartTime.equals(eventStartTime)) {
-                        throw new OverlappedExceptionHandler("Time is Overlapped");
-                    }
+        if (userLogin != null) {
+            if (userLogin.getRole().equals(Role.admin)) {
+                checkOverlapCreate(newEvent, newEventStartTime, newEventEndTime, eventList);
+                User addByAdmin = userRepository.findByEmail(newEvent.getBookingEmail());
+                newEvent.setUserId(addByAdmin.getUserId());
+                Event event = modelMapper.map(newEvent, Event.class);
+                repository.saveAndFlush(event);
+                return ResponseEntity.status(HttpStatus.OK).body(event).getBody();
+
+            } else if (userLogin.getRole().equals(Role.student)) {
+                if (Objects.equals(userLogin.getEmail(), newEvent.getBookingEmail())) {
+                    checkOverlapCreate(newEvent, newEventStartTime, newEventEndTime, eventList);
+                    newEvent.setUserId(userLogin.getUserId());
+                    Event event = modelMapper.map(newEvent, Event.class);
+                    repository.saveAndFlush(event);
+                    return ResponseEntity.status(HttpStatus.OK).body(event).getBody();
+                } else {
+                    throw new HandleExceptionBadRequest("The booking email must be the same as the student's email");
                 }
             }
-
-            User addByAdmin = userRepository.findByEmail(newEvent.getBookingEmail());
-            newEvent.setUserId(addByAdmin.getUserId());
-            Event e = modelMapper.map(newEvent, Event.class);
-            repository.saveAndFlush(e);
-            return ResponseEntity.status(HttpStatus.OK).body(e).getBody();
-
-        } else if (userLogin.getRole().equals(Role.student)) {
-            if (Objects.equals(userLogin.getEmail(), newEvent.getBookingEmail())) {
-                for (EventDTO eventDTO : eventList) {
-                    if (Objects.equals(newEvent.getEventCategory().getId(), eventDTO.getEventCategory().getId())) {
-                        Date eventStartTime = Date.from(eventDTO.getEventStartTime());
-                        Date eventEndTime = findEndDate(Date.from(eventDTO.getEventStartTime()), eventDTO.getEventDuration());
-                        if (newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventStartTime) ||
-                                newEventStartTime.before(eventEndTime) && newEventEndTime.after(eventEndTime) ||
-                                newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventEndTime) ||
-                                newEventStartTime.after(eventStartTime) && newEventEndTime.before(eventEndTime) ||
-                                newEventStartTime.equals(eventStartTime)) {
-                            throw new OverlappedExceptionHandler("Time is Overlapped");
-                        }
-                    }
-                }
-                newEvent.setUserId(userLogin.getUserId());
-                Event e = modelMapper.map(newEvent, Event.class);
-                repository.saveAndFlush(e);
-                return ResponseEntity.status(HttpStatus.OK).body(e).getBody();
-            } else {
-                throw new HandleExceptionBadRequest("The booking email must be the same as the student's email");
-            }
-        } else {
-            throw new HandleExceptionForbidden("You are not allowed to add event");
         }
+        checkOverlapCreate(newEvent, newEventStartTime, newEventEndTime, eventList);
+        Event event = modelMapper.map(newEvent, Event.class);
+        repository.saveAndFlush(event);
+        return ResponseEntity.status(HttpStatus.OK).body(event).getBody();
+    }
+
+    public List<EventDTO> getEventToCheckOverlap(){
+        return this.listMapper.mapList(this.repository.findAll(Sort.by("eventStartTime").descending()), EventDTO.class, this.modelMapper);
     }
 
     //Delete event with id
@@ -268,5 +251,29 @@ public class EventService {
         existingEvent.setEventStartTime(updateEvent.getEventStartTime());
         existingEvent.setEventNotes(updateEvent.getEventNotes());
         return existingEvent;
+    }
+
+    private void checkOverlapCreate(EventDTO newEvent, Date newEventStartTime, Date newEventEndTime, List<EventDTO> eventList) throws OverlappedExceptionHandler {
+        for (EventDTO eventDTO : eventList) {
+            if (Objects.equals(newEvent.getEventCategory().getId(), eventDTO.getEventCategory().getId())) { //เช็คเฉพาะ EventCategory เดียวกัน
+                Date eventStartTime = Date.from(eventDTO.getEventStartTime());
+                Date eventEndTime = findEndDate(Date.from(eventDTO.getEventStartTime()), eventDTO.getEventDuration());
+                checkIfTwoDateRanges(newEventStartTime, newEventEndTime, eventStartTime, eventEndTime);
+            }
+        }
+    }
+
+    public static void checkIfTwoDateRanges(Date newEventStartTime, Date newEventEndTime, Date eventStartTime, Date eventEndTime) throws OverlappedExceptionHandler {
+        checkTimeOverlap(newEventStartTime, newEventEndTime, eventStartTime, eventEndTime);
+    }
+
+    public static void checkTimeOverlap(Date newEventStartTime, Date newEventEndTime, Date eventStartTime, Date eventEndTime) throws OverlappedExceptionHandler {
+        if (newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventStartTime) ||
+                newEventStartTime.before(eventEndTime) && newEventEndTime.after(eventEndTime) ||
+                newEventStartTime.before(eventStartTime) && newEventEndTime.after(eventEndTime) ||
+                newEventStartTime.after(eventStartTime) && newEventEndTime.before(eventEndTime) ||
+                newEventStartTime.equals(eventStartTime)) {
+            throw new OverlappedExceptionHandler("Time is Overlapped");
+        }
     }
 }
