@@ -47,10 +47,10 @@ public class EventCategoryService {
         return repository.saveAndFlush(category);
     }
 
-    private EventCategory mapCategory(EventCategory existingEvent, EventCategory updateCategory) {
-        existingEvent.setEventCategoryName(updateCategory.getEventCategoryName());
-        existingEvent.setEventCategoryDescription(updateCategory.getEventCategoryDescription());
-        existingEvent.setEventDuration(updateCategory.getEventDuration());
-        return existingEvent;
+    private EventCategory mapCategory(EventCategory existingEventCategory, EventCategory updateCategory) {
+        existingEventCategory.setEventCategoryName(updateCategory.getEventCategoryName().trim());
+        existingEventCategory.setEventCategoryDescription(updateCategory.getEventCategoryDescription());
+        existingEventCategory.setEventDuration(updateCategory.getEventDuration());
+        return existingEventCategory;
     }
 }

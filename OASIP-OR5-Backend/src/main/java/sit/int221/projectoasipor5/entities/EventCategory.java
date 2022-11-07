@@ -49,4 +49,11 @@ public class EventCategory {
 
     public EventCategory() {
     }
+
+    private EventCategory mapCategory(EventCategory existingEventCategory, EventCategory updateCategory) {
+        existingEventCategory.setEventCategoryName(updateCategory.getEventCategoryName().trim());
+        existingEventCategory.setEventCategoryDescription(updateCategory.getEventCategoryDescription());
+        existingEventCategory.setEventDuration(updateCategory.getEventDuration());
+        return existingEventCategory;
+    }
 }
