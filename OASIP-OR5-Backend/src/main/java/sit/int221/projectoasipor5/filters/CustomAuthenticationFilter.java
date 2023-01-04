@@ -42,9 +42,10 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
 
     private final String secret = "secret";
 
-    private final Integer jwtExpirationInMs = 30 * 60 * 1000;
+    // ปรับ access token จาก 30 นาที เหลือ 1 นาทีเพื่อให้ง่ายต่อการตรวจ
+    private final Integer jwtExpirationInMs = 1 * 60 * 1000;
 
-    private final Integer refreshExpirationDateInMs = 24 * 60 * 60 * 1000;
+    private final Integer refreshExpirationDateInMs = 2 * 60 * 1000;
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;

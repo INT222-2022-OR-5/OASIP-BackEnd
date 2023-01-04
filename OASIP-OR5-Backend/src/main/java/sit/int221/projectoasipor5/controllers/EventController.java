@@ -117,26 +117,4 @@ public class EventController {
         repository.saveAndFlush(event);
         return ResponseEntity.status(200).body(event);
     }
-
-
-    @GetMapping({"/clinic"})
-    public List <EventDTO> getEventByCategory(@RequestParam EventCategory eventCategoryId) throws HandleExceptionForbidden {
-        return this.eventService.getEventByCategoryId(eventCategoryId);
-    }
-
-    @GetMapping({"/datetime"})
-    public List <EventDTO> getEventByDateTime(@RequestParam String Date) throws HandleExceptionForbidden {
-        return  this.eventService.getEventByDateTime(Date+"T00:00:00Z", Date+"T23:59:00Z");
-    }
-
-    @GetMapping({"/schedule-past"})
-    public List <EventDTO> getPastEvent(@RequestParam Instant DateTime) {
-        return this.eventService.getPastEvent(DateTime);
-    }
-
-    @GetMapping({"/schedule-comingup"})
-    public List <EventDTO> getUpcomingEvent(@RequestParam Instant DateTime) {
-        return this.eventService.getUpcomingEvent(DateTime);
-    }
-
 }

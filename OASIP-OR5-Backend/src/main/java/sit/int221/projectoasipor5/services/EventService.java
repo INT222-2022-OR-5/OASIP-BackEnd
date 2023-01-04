@@ -26,6 +26,7 @@ import org.springframework.web.server.ResponseStatusException;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
 import java.util.List;
@@ -143,17 +144,17 @@ public class EventService {
         int categoryId = Integer.parseInt(newEvent.getEventCategory().getId().toString());
         EventCategory eventCategory = categoryRepository.findById(categoryId).orElseThrow(()->new ResponseStatusException(
                 HttpStatus.NOT_FOUND, "Category Id: "+ categoryId + "Does Not Exist!"));
-        LocalDateTime time = LocalDateTime.ofInstant(newEvent.getEventStartTime(), ZoneId.systemDefault());
-        String dateTime = time.format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-        String subject = "Dear " + newEvent.getBookingName() + ",";
+        ZonedDateTime time = ZonedDateTime.ofInstant(newEvent.getEventStartTime(), ZoneId.of("Asia/Bangkok"));
+        String dateTime = time.format(DateTimeFormatter.ofPattern("EEEE, MMM dd, yyyy HH:mm"));
+        String endTime = findEndTime(time, newEvent.getEventDuration()).toString().substring(11,16);
+        String zone = time.format(DateTimeFormatter.ofPattern("(z)"));
+        String subject = "[OASIP] " + eventCategory.getEventCategoryName() + " @ " + dateTime + " - " + endTime + " " + zone ;
         String body = message + "\n \n" +
-                "Name : " + newEvent.getBookingName() + "\n" +
-                "Clinic : " + eventCategory.getEventCategoryName() + "\n" +
-                "Date : " + dateTime + "\n" +
-                "Duration :" + newEvent.getEventDuration() + " minute \n" +
-                "Note : " + newEvent.getEventNotes() + "\n \n" + "-- \n" +
-                "Thank you for using our service. \n" +
-                "OASIP-SY6 (Admin)";
+                "Reply-to: noreply@intproj21.sit.kmutt.ac.th" + "\n" +
+                "Booking Name: " + newEvent.getBookingName() + "\n" +
+                "Event Category: " + eventCategory.getEventCategoryName() + "\n" +
+                "When: " + dateTime + " - " + endTime + " " + zone  + "\n" +
+                "Event Notes: " + newEvent.getEventNotes();
         emailService.sendEmail(newEvent.getBookingEmail() , subject , body);
     }
 
@@ -188,89 +189,9 @@ public class EventService {
         return new Date(date.getTime() + (duration * 60000 + 60000));
     }
 
-    public List<EventDTO> getEventByCategoryId(EventCategory eventCategoryId) throws HandleExceptionForbidden {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userLogin = userRepository.findByEmail(auth.getPrincipal().toString());
-        if (userLogin.getRole().equals(Role.admin)) {
-            List<Event> eventByCategory = repository.findAllByEventCategoryOrderByEventCategoryDesc(eventCategoryId);
-            return listMapper.mapList(eventByCategory, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.student)) {
-            List<Event> eventByCategory = repository.
-                    findAllByBookingEmailAndEventCategoryOrderByEventCategoryDesc(auth.getPrincipal().toString(), eventCategoryId);
-            return listMapper.mapList(eventByCategory, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.lecturer)) {
-            List<Integer> eventByCategory = userLogin.getEventCategories().stream().map(EventCategory::getId).collect(Collectors.toList());
-            if (eventByCategory.contains(eventCategoryId.getId())) {
-                List<Event> eventByCategoryId = repository.findAllByEventCategoryOrderByEventCategoryDesc(eventCategoryId);
-                return listMapper.mapList(eventByCategoryId, EventDTO.class, modelMapper);
-            } else {
-                throw new HandleExceptionForbidden("You are not owner of this category");
-            }
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, userLogin.getEmail() + "is not owner of this event");
-        }
-    }
-
-    public List<EventDTO> getPastEvent(Instant instant) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userLogin = userRepository.findByEmail(auth.getPrincipal().toString());
-        if (userLogin.getRole().equals(Role.admin)) {
-            List<Event> pastEvent = repository.findAllByEventStartTimeBeforeOrderByEventStartTimeDesc(instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.student)) {
-            List<Event> pastEvent =
-                    repository.findAllByBookingEmailAndEventStartTimeBeforeOrderByEventStartTimeDesc(auth.getPrincipal().toString(), instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.lecturer)) {
-            List<Integer> eventByCategory = userLogin.getEventCategories().stream().map(EventCategory::getId).collect(Collectors.toList());
-            List<Event> pastEvent = repository.findAllByEventCategory_IdInAndEventStartTimeBeforeOrderByEventStartTimeDesc(eventByCategory, instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, userLogin.getEmail() + "is not owner of this event");
-        }
-    }
-
-    public List<EventDTO> getUpcomingEvent(Instant instant) {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userLogin = userRepository.findByEmail(auth.getPrincipal().toString());
-        if (userLogin.getRole().equals(Role.admin)) {
-            List<Event> pastEvent = repository.findAllByEventStartTimeAfterOrderByEventStartTimeAsc(instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.student)) {
-            List<Event> pastEvent = repository.
-                    findAllByBookingEmailAndEventStartTimeAfterOrderByEventStartTimeAsc(auth.getPrincipal().toString(), instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.lecturer)) {
-            List<Integer> eventByCategory = userLogin.getEventCategories().stream().map(EventCategory::getId).collect(Collectors.toList());
-            List<Event> pastEvent = repository.findAllByEventCategory_IdInAndEventStartTimeAfterOrderByEventStartTimeAsc(eventByCategory, instant);
-            return listMapper.mapList(pastEvent, EventDTO.class, modelMapper);
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, userLogin.getEmail() + "is not owner of this event");
-        }
-    }
-
-    public List<EventDTO> getEventByDateTime(String startTime, String endTime) throws HandleExceptionForbidden {
-        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        User userLogin = userRepository.findByEmail(auth.getPrincipal().toString());
-        if (userLogin.getRole().equals(Role.admin)) {
-            List<Event> eventByDateTime = repository.findAllByEventStartTimeBetween(Instant.parse(startTime), Instant.parse(endTime));
-            return listMapper.mapList(eventByDateTime, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.student)) {
-            List<Event> eventByDateTime = repository.
-                    findAllByBookingEmailAndEventStartTimeBetween(auth.getPrincipal().toString(), Instant.parse(startTime), Instant.parse(endTime));
-            return listMapper.mapList(eventByDateTime, EventDTO.class, modelMapper);
-        } else if (userLogin.getRole().equals(Role.lecturer)) {
-            List<Event> eventList = repository.findByEventCategory_IdInAndEventStartTimeBetween(userLogin.getEventCategories().stream().map(EventCategory::getId).collect(Collectors.toList()),
-                    Instant.parse(startTime), Instant.parse(endTime));
-            if(eventList != null){
-                return listMapper.mapList(eventList, EventDTO.class, modelMapper);
-            } else {
-                throw new HandleExceptionForbidden("You are not category owner of this event");
-            }
-
-        } else {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, userLogin.getEmail() + "is not owner of this event");
-        }
+    public ZonedDateTime findEndTime(ZonedDateTime eventStartTime, Integer duration) {
+        ZonedDateTime EventEndTime = eventStartTime.plusMinutes(duration);
+        return EventEndTime;
     }
 
     private Event mapEvent(Event existingEvent , Event updateEvent){

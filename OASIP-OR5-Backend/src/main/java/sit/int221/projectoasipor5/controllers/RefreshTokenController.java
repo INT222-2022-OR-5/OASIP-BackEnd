@@ -32,7 +32,7 @@ public class RefreshTokenController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
     private final String secret = "secret";
-    private final Integer jwtExpirationInMs = 30 * 60 * 1000;
+    private final Integer jwtExpirationInMs = 1 * 60 * 1000;
 
     public RefreshTokenController(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;

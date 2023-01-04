@@ -19,6 +19,7 @@ import org.springframework.security.web.util.matcher.RequestMatcher;
 import sit.int221.projectoasipor5.exception.CustomAccessDeniedHandler;
 import sit.int221.projectoasipor5.filters.CustomAuthenticationFilter;
 import sit.int221.projectoasipor5.filters.CustomAuthorizationFilter;
+import sit.int221.projectoasipor5.models.JwtAuthenticationEntryPoint;
 import sit.int221.projectoasipor5.services.UserService;
 
 
@@ -36,6 +37,9 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
 
     @Bean
     public Argon2PasswordEncoder argon2PasswordEncoder() {
@@ -63,6 +67,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         CustomAuthenticationFilter customAuthenticationFilter = new CustomAuthenticationFilter(authenticationManagerBean());
         customAuthenticationFilter.setFilterProcessesUrl("/api/login");
         http.csrf().disable().cors().and()
+                .exceptionHandling().authenticationEntryPoint(new JwtAuthenticationEntryPoint()).and()
                 .authorizeRequests()
                 .antMatchers(GET, "/api/users/**").hasAuthority("admin")
                 .antMatchers(DELETE, "/api/users/**").hasAuthority("admin")
@@ -77,6 +82,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .anyRequest().authenticated().and()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .exceptionHandling().accessDeniedHandler(accessDeniedHandler()).and()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and()
                 .addFilter(customAuthenticationFilter)
                 .addFilterBefore(new CustomAuthorizationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
